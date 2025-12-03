@@ -20,6 +20,7 @@ Security Note:
 
 import argparse
 import hashlib
+import json
 import os
 import sys
 import time
@@ -208,8 +209,6 @@ def save_keys(keypair: PoolKeyPair, output_dir: Path) -> None:
         keypair: The generated key pair
         output_dir: Directory to save the files
     """
-    import json
-    
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Set restrictive permissions on the output directory
@@ -342,6 +341,11 @@ Security Warning:
     try:
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
             while result is None:
+                # Check max attempts limit before submitting new batch
+                if args.max_attempts > 0 and total_attempts >= args.max_attempts:
+                    print(f"\nMax attempts ({args.max_attempts:,}) reached. No match found.")
+                    sys.exit(1)
+                
                 # Submit batch of work
                 futures = [
                     executor.submit(search_for_prefix, prefix, batch_size)
@@ -359,11 +363,6 @@ Security Warning:
                         for f in futures:
                             f.cancel()
                         break
-                
-                # Check max attempts limit
-                if args.max_attempts > 0 and total_attempts >= args.max_attempts:
-                    print(f"\nMax attempts ({args.max_attempts:,}) reached. No match found.")
-                    sys.exit(1)
                 
                 # Progress update
                 if not args.quiet:
