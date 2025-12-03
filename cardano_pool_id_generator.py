@@ -250,10 +250,10 @@ def _atomic_write_file(path: Path, content: str, mode: int) -> None:
         _safe_chmod(Path(tmp_path), mode)
         os.replace(tmp_path, path)
     except Exception:
-        # Clean up temp file on error
+        # Clean up temp file on error - ignore FileNotFoundError if already removed
         try:
             os.unlink(tmp_path)
-        except OSError:
+        except FileNotFoundError:
             pass
         raise
 
