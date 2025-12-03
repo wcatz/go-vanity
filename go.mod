@@ -1,5 +1,7 @@
 module github.com/wcatz/go-vanity
 
+go 1.21
+
 require (
-	github.com/yourusername/bursa v0.0.0 // replace with actual version
+	github.com/blinklabs-io/bursa v0.1.0
 )
